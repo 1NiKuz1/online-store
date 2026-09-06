@@ -1,0 +1,9 @@
+.husky
+.next
+.vscode
+out
+build
+node_modules
+dist
+*.log
+pnpm-lock.yaml
