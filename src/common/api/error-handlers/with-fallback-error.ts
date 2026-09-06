@@ -10,7 +10,11 @@ export function withFallbackErrorHandling(handler: Handler): Handler {
       return await handler(req, context);
     } catch (error) {
       if (error instanceof DomainError) {
-        return NextResponse.json({ error: error.message }, { status: 422 });
+        console.error("[UnhandledDomainError] Every DomainError must have a specific handler", {
+          name: error.name,
+          message: error.message,
+        });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
       }
 
       console.error("Unhandled error:", error);
