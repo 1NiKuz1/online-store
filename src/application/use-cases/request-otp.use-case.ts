@@ -1,13 +1,18 @@
+import { InvariantViolationError, UserNotAccessibleError } from "@/domain/errors";
+
 import { RequestOtpSchema } from "../dto";
 import { normalizeIdentifier } from "../utils";
 
 import type { RequestOtpInput, RequestOtpDto } from "../dto";
 import type { IMessageService, IOtpService, IRateLimiterService } from "../ports";
+import type { IUserIdentityRepository, IUserRepository } from "@domain/repositories";
 
 export class RequestOtpUseCase {
   public constructor(
     private readonly otpService: IOtpService,
     private readonly rateLimiterService: IRateLimiterService,
+    private readonly userIdentityRepository: IUserIdentityRepository,
+    private readonly userRepository: IUserRepository,
     private readonly emailService: IMessageService,
     private readonly smsService: IMessageService
   ) {}
@@ -21,6 +26,8 @@ export class RequestOtpUseCase {
       windowSeconds: 15 * 60,
     });
 
+    await this.assertRecipientIsAccessible(type, normalizedValue);
+
     const code = await this.otpService.generateCode(type, normalizedValue);
 
     if (type === "email") {
@@ -33,5 +40,31 @@ export class RequestOtpUseCase {
       success: true,
       message: "OTP sent successfully",
     };
+  }
+
+  private async assertRecipientIsAccessible(
+    type: "email" | "phone",
+    normalizedValue: string
+  ): Promise<void> {
+    const existingIdentity = await this.userIdentityRepository.findByTypeAndValue(
+      type,
+      normalizedValue
+    );
+    if (!existingIdentity) {
+      return;
+    }
+
+    const user = await this.userRepository.findById(existingIdentity.userId);
+    if (!user) {
+      throw new InvariantViolationError(
+        "identity_orphan",
+        "user_identities row references non-existent user",
+        { userId: existingIdentity.userId, type, value: normalizedValue }
+      );
+    }
+
+    if (user.deletedAt || user.status !== "active") {
+      throw new UserNotAccessibleError(user.id, user.status, user.deletedAt ?? null);
+    }
   }
 }
