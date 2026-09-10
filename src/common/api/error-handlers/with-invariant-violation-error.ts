@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 
 import { InvariantViolationError } from "@domain/errors";
 
-import { type Handler } from "../types";
+import { type Middleware } from "../types";
 
-export function withInvariantViolationErrorHandling(handler: Handler): Handler {
-  return async (req, context) => {
+export const withInvariantViolationErrorHandling: Middleware =
+  (handler) => async (req, context) => {
     try {
       return await handler(req, context);
     } catch (error) {
@@ -20,4 +20,3 @@ export function withInvariantViolationErrorHandling(handler: Handler): Handler {
       throw error;
     }
   };
-}

@@ -8,9 +8,9 @@ import {
   withUserNotAccessibleErrorHandling,
   withZodErrorHandling,
 } from "../error-handlers";
-import { withRequestScope } from "../with-request-scope";
+import { withAuth, withRequestScope } from "../request-handlers";
 
-import type { Handler } from "../types";
+import type { AuthRequestContext, Handler, NextHandler, RequestContext } from "../types";
 
 export const withStandardErrorHandling = compose(
   withFallbackErrorHandling,
@@ -26,6 +26,13 @@ export const withAuthErrorHandling = compose(
   withUserNotAccessibleErrorHandling
 );
 
-export function createAuthHandler(handler: Handler): Handler {
-  return compose(withAuthErrorHandling, withRequestScope)(handler);
+export function createAuthHandler(handler: Handler<RequestContext>): NextHandler {
+  const withError = withAuthErrorHandling(handler);
+  return withRequestScope(withError);
+}
+
+export function createProtectedHandler(handler: Handler<AuthRequestContext>): NextHandler {
+  const withAuthHandler = withAuth(handler);
+  const withError = withAuthErrorHandling(withAuthHandler);
+  return withRequestScope(withError);
 }
