@@ -1,5 +1,7 @@
 import { and, eq, gt, isNull, lt } from "drizzle-orm";
 
+import { InvariantViolationError } from "@domain/errors";
+
 import { sessions } from "../drizzle/schema";
 
 import type { Database } from "../drizzle/client";
@@ -25,6 +27,23 @@ export class DrizzleSessionRepository implements ISessionRepository {
     return row ? this.mapToSession(row) : null;
   }
 
+  public async findActiveByTokenHash(tokenHash: string): Promise<Session | null> {
+    const now = new Date();
+    const [row] = await this.db
+      .select()
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.token_hash, tokenHash),
+          isNull(sessions.revoked_at),
+          gt(sessions.expires_at, now)
+        )
+      )
+      .limit(1);
+
+    return row ? this.mapToSession(row) : null;
+  }
+
   public async create(input: CreateSessionInput): Promise<Session> {
     const [row] = await this.db
       .insert(sessions)
@@ -38,14 +57,33 @@ export class DrizzleSessionRepository implements ISessionRepository {
       .returning();
 
     if (!row) {
-      throw new Error("Failed to create session");
+      throw new InvariantViolationError(
+        "session_create_returned_no_row",
+        "INSERT INTO sessions ... RETURNING returned no row"
+      );
     }
 
     return this.mapToSession(row);
   }
 
-  public async revoke(id: SessionId): Promise<void> {
-    await this.db.update(sessions).set({ revoked_at: new Date() }).where(eq(sessions.id, id));
+  public async revokeAllByUserId(userId: UserId): Promise<Session[]> {
+    const rows = await this.db
+      .update(sessions)
+      .set({ revoked_at: new Date() })
+      .where(and(eq(sessions.user_id, userId), isNull(sessions.revoked_at)))
+      .returning();
+
+    return rows.map((row) => this.mapToSession(row));
+  }
+
+  public async revoke(id: SessionId): Promise<Session | null> {
+    const [row] = await this.db
+      .update(sessions)
+      .set({ revoked_at: new Date() })
+      .where(eq(sessions.id, id))
+      .returning();
+
+    return row ? this.mapToSession(row) : null;
   }
 
   public async delete(id: SessionId): Promise<void> {

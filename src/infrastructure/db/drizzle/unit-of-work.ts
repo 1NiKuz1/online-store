@@ -1,8 +1,10 @@
 import { DomainError, TransactionFailedError } from "@domain/errors";
 
-import { DrizzleSessionRepository } from "../repositories/session.repository";
-import { DrizzleUserIdentityRepository } from "../repositories/user-identity.repository";
-import { DrizzleUserRepository } from "../repositories/user.repository";
+import {
+  DrizzleSessionRepository,
+  DrizzleUserIdentityRepository,
+  DrizzleUserRepository,
+} from "../repositories";
 
 import type { Database } from "./client";
 import type { TransactionContext, IUnitOfWork, TransactionCallback } from "@application/ports";

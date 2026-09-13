@@ -1,6 +1,7 @@
 import { DomainError } from "./domain-error";
+import { InvariantViolationError } from "./invariant-error";
 
-import type { UserId, UserStatus } from "../entities/types";
+import type { UserId, UserStatus } from "../entities";
 
 /**
  * User account is not accessible for sign-in.
@@ -27,7 +28,11 @@ export class UserNotAccessibleError extends DomainError {
       message = "User is not accessible: suspended";
       reason = "suspended";
     } else {
-      throw new Error(`UserNotAccessibleError invoked with status="${status}" and no deletedAt`);
+      throw new InvariantViolationError(
+        "user_not_accessible_invalid_construction",
+        `UserNotAccessibleError invoked with status="${status}" and no deletedAt`,
+        { userId, status }
+      );
     }
 
     super(message);

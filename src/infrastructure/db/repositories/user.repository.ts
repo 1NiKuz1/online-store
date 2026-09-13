@@ -1,5 +1,7 @@
 import { eq } from "drizzle-orm";
 
+import { InvariantViolationError } from "@domain/errors";
+
 import { users } from "../drizzle/schema";
 
 import type { Database } from "../drizzle/client";
@@ -25,7 +27,10 @@ export class DrizzleUserRepository implements IUserRepository {
       .returning();
 
     if (!row) {
-      throw new Error("Failed to create user");
+      throw new InvariantViolationError(
+        "user_create_returned_no_row",
+        "INSERT INTO users ... RETURNING returned no row"
+      );
     }
 
     return this.mapToUser(row);

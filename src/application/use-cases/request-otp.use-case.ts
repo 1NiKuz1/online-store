@@ -1,4 +1,4 @@
-import { InvariantViolationError, UserNotAccessibleError } from "@/domain/errors";
+import { InvariantViolationError, UserNotAccessibleError } from "@domain/errors";
 
 import { RequestOtpSchema } from "../dto";
 import { normalizeIdentifier } from "../utils";

@@ -1,5 +1,7 @@
 import { and, eq } from "drizzle-orm";
 
+import { InvariantViolationError } from "@domain/errors";
+
 import { userIdentities } from "../drizzle/schema";
 
 import type { Database } from "../drizzle/client";
@@ -40,7 +42,10 @@ export class DrizzleUserIdentityRepository implements IUserIdentityRepository {
       .returning();
 
     if (!row) {
-      throw new Error("Failed to create user identity");
+      throw new InvariantViolationError(
+        "user_identity_create_returned_no_row",
+        "INSERT INTO user_identities ... RETURNING returned no row"
+      );
     }
 
     return this.mapToUserIdentity(row);

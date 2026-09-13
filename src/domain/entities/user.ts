@@ -7,5 +7,5 @@ export interface User {
   lastSeenAt: Date;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date | null;
+  deletedAt: Date | null;
 }

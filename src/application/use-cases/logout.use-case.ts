@@ -1,18 +1,14 @@
-import type { SessionId } from "@domain/entities/types";
-import type { ISessionRepository } from "@domain/repositories";
+import type { ISessionService } from "../ports";
+import type { SessionId } from "@domain/entities";
 
 export type LogoutInput = {
   sessionId: SessionId;
 };
 
 export class LogoutUseCase {
-  public constructor(private readonly sessionRepository: ISessionRepository) {}
+  public constructor(private readonly sessionService: ISessionService) {}
 
   public async execute(input: LogoutInput): Promise<void> {
-    const session = await this.sessionRepository.findById(input.sessionId);
-    if (!session) {
-      return;
-    }
-    await this.sessionRepository.revoke(session.id);
+    await this.sessionService.revoke(input.sessionId);
   }
 }

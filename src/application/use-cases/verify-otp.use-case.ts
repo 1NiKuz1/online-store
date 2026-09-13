@@ -1,14 +1,12 @@
-import { InvariantViolationError, UserNotAccessibleError } from "@/domain/errors";
 import { createSha256Hash, generateSessionToken } from "@common/utils";
+import { InvariantViolationError, UserNotAccessibleError } from "@domain/errors";
 
 import { VerifyOtpSchema } from "../dto";
 import { normalizeIdentifier } from "../utils";
 
 import type { ClientInfo, UserDto, VerifyOtpDto, VerifyOtpInput } from "../dto";
-import type { IOtpService } from "../ports";
-import type { IUnitOfWork, TransactionContext } from "../ports/unit-of-work.port";
-import type { UserId } from "@domain/entities/types";
-import type { User } from "@domain/entities/user";
+import type { IOtpService, IUnitOfWork, TransactionContext } from "../ports";
+import type { UserId, User } from "@domain/entities";
 
 const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 

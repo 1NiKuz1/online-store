@@ -1,16 +1,17 @@
 import { createContainer, InjectionMode, asValue, asClass, type AwilixContainer } from "awilix";
 
+import { SessionService } from "@application/services";
 import { LogoutUseCase, RequestOtpUseCase, VerifyOtpUseCase } from "@application/use-cases";
 import { db } from "@infrastructure/db/drizzle/client";
 import { DrizzleUnitOfWork } from "@infrastructure/db/drizzle/unit-of-work";
-import { DrizzleSessionRepository } from "@infrastructure/db/repositories/session.repository";
-import { DrizzleUserIdentityRepository } from "@infrastructure/db/repositories/user-identity.repository";
-import { DrizzleUserRepository } from "@infrastructure/db/repositories/user.repository";
-import { ConsoleEmailService } from "@infrastructure/messages/email.service";
-import { ConsoleSmsService } from "@infrastructure/messages/sms.service";
+import {
+  DrizzleSessionRepository,
+  DrizzleUserIdentityRepository,
+  DrizzleUserRepository,
+} from "@infrastructure/db/repositories";
+import { ConsoleEmailService, ConsoleSmsService } from "@infrastructure/messages";
 import { redis } from "@infrastructure/redis/client";
-import { OtpService } from "@infrastructure/redis/services/otp.service";
-import { RateLimiterService } from "@infrastructure/redis/services/rate-limiter.service";
+import { OtpService, RateLimiterService, CacheService } from "@infrastructure/redis/services";
 
 // Persist the container on globalThis so Next.js HMR doesn't recreate it
 // (and thus all singletons) on every code change in dev.
@@ -41,6 +42,8 @@ container.register({
   rateLimiterService: asClass(RateLimiterService).singleton(),
   emailService: asClass(ConsoleEmailService).singleton(),
   smsService: asClass(ConsoleSmsService).singleton(),
+  cacheService: asClass(CacheService).singleton(),
+  sessionService: asClass(SessionService).singleton(),
 
   // Repositories
   userRepository: asClass(DrizzleUserRepository).singleton(),

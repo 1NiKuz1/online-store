@@ -1,5 +1,4 @@
-import type { IdentityType, UserId, UserIdentityId } from "../entities/types";
-import type { UserIdentity } from "../entities/user-identity";
+import type { IdentityType, UserId, UserIdentityId, UserIdentity } from "../entities";
 
 export interface CreateUserIdentityInput {
   userId: UserId;

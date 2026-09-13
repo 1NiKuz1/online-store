@@ -6,7 +6,7 @@ export interface Session {
   tokenHash: string;
   expiresAt: Date;
   createdAt: Date;
-  revokedAt?: Date | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
+  revokedAt: Date | null;
+  ipAddress: string | null;
+  userAgent: string | null;
 }

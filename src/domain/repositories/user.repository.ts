@@ -1,5 +1,4 @@
-import type { UserId, UserRole, UserStatus } from "../entities/types";
-import type { User } from "../entities/user";
+import type { UserId, UserRole, UserStatus, User } from "../entities";
 
 export interface CreateUserInput {
   role: UserRole;
