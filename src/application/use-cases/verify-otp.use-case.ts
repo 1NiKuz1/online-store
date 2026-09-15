@@ -2,9 +2,10 @@ import { createSha256Hash, generateSessionToken } from "@common/utils";
 import { InvariantViolationError, UserNotAccessibleError } from "@domain/errors";
 
 import { VerifyOtpSchema } from "../dto";
+import { mapUserToDto } from "../mappers";
 import { normalizeIdentifier } from "../utils";
 
-import type { ClientInfo, UserDto, VerifyOtpDto, VerifyOtpInput } from "../dto";
+import type { ClientInfo, VerifyOtpDto, VerifyOtpInput } from "../dto";
 import type { IOtpService, IUnitOfWork, TransactionContext } from "../ports";
 import type { UserId, User } from "@domain/entities";
 
@@ -20,7 +21,7 @@ export class VerifyOtpUseCase {
     const { type, value, code } = VerifyOtpSchema.parse(input);
     const normalizedValue = normalizeIdentifier(type, value);
 
-    await this.otpService.verifyCode(type, normalizedValue, code);
+    await this.otpService.verify(type, normalizedValue, code);
 
     return this.unitOfWork.transaction("verify-otp", async (ctx) => {
       const { userId, isNewUser } = await this.resolveOrCreateUser(ctx, type, normalizedValue);
@@ -37,7 +38,7 @@ export class VerifyOtpUseCase {
       const user = await this.loadUserForResponse(ctx, userId);
 
       return {
-        user: this.mapUserToDto(user),
+        user: mapUserToDto(user),
         sessionToken,
         maxAge: SESSION_TTL_SECONDS,
       };
@@ -107,15 +108,5 @@ export class VerifyOtpUseCase {
       );
     }
     return user;
-  }
-
-  private mapUserToDto(user: User): UserDto {
-    return {
-      id: user.id,
-      role: user.role,
-      status: user.status,
-      lastSeenAt: user.lastSeenAt.toISOString(),
-      createdAt: user.createdAt.toISOString(),
-    };
   }
 }

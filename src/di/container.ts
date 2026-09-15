@@ -1,7 +1,12 @@
 import { createContainer, InjectionMode, asValue, asClass, type AwilixContainer } from "awilix";
 
 import { SessionService } from "@application/services";
-import { LogoutUseCase, RequestOtpUseCase, VerifyOtpUseCase } from "@application/use-cases";
+import {
+  CurrentUserUseCase,
+  LogoutUseCase,
+  RequestOtpUseCase,
+  VerifyOtpUseCase,
+} from "@application/use-cases";
 import { db } from "@infrastructure/db/drizzle/client";
 import { DrizzleUnitOfWork } from "@infrastructure/db/drizzle/unit-of-work";
 import {
@@ -54,4 +59,5 @@ container.register({
   requestOtpUseCase: asClass(RequestOtpUseCase).transient(),
   verifyOtpUseCase: asClass(VerifyOtpUseCase).transient(),
   logoutUseCase: asClass(LogoutUseCase).transient(),
+  currentUserUseCase: asClass(CurrentUserUseCase).transient(),
 });

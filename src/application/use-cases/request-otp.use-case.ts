@@ -28,7 +28,7 @@ export class RequestOtpUseCase {
 
     await this.assertRecipientIsAccessible(type, normalizedValue);
 
-    const code = await this.otpService.generateCode(type, normalizedValue);
+    const { code, expiresAt } = await this.otpService.issue(type, normalizedValue);
 
     if (type === "email") {
       await this.emailService.send(normalizedValue, `Your OTP code: ${code}`);
@@ -39,6 +39,7 @@ export class RequestOtpUseCase {
     return {
       success: true,
       message: "OTP sent successfully",
+      expiresAt,
     };
   }
 

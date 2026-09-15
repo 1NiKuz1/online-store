@@ -9,7 +9,10 @@ export const withRateLimitErrorHandling: Middleware = (handler) => async (req, c
     return await handler(req, context);
   } catch (error) {
     if (error instanceof RateLimitExceededError) {
-      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+      return NextResponse.json(
+        { error: "Rate limit exceeded", retryAfter: error.retryAfter },
+        { status: 429 }
+      );
     }
     throw error;
   }

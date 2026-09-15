@@ -1,0 +1,3 @@
+export type NonNullableFields<T> = {
+  [K in keyof T]: NonNullable<T[K]>;
+};

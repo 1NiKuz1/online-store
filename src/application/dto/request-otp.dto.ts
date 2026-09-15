@@ -10,4 +10,5 @@ export type RequestOtpInput = z.infer<typeof RequestOtpSchema>;
 export interface RequestOtpDto {
   success: true;
   message: string;
+  expiresAt: string;
 }

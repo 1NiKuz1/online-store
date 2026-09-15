@@ -5,7 +5,7 @@ import { OtpCodeNotFoundError, OtpInvalidCodeError, OtpTooManyAttemptsError } fr
 
 import { redis } from "../client";
 
-import type { IOtpService } from "@application/ports";
+import type { IssuedOtp, IOtpService } from "@application/ports";
 
 const OTP_TTL_SECONDS = 5 * 60; // 5 minutes
 const MAX_ATTEMPTS = 5;
@@ -16,7 +16,7 @@ interface OtpStoredData {
 }
 
 export class OtpService implements IOtpService {
-  async generateCode(type: "email" | "phone", value: string): Promise<string> {
+  async issue(type: "email" | "phone", value: string): Promise<IssuedOtp> {
     const code = randomInt(100000, 999999).toString();
     const codeHash = createSha256Hash(code);
     const key = this.getKey(type, value);
@@ -30,10 +30,10 @@ export class OtpService implements IOtpService {
       EX: OTP_TTL_SECONDS,
     });
 
-    return code;
+    return { code, expiresAt: new Date(Date.now() + OTP_TTL_SECONDS * 1000).toISOString() };
   }
 
-  async verifyCode(type: "email" | "phone", value: string, code: string): Promise<void> {
+  async verify(type: "email" | "phone", value: string, code: string): Promise<void> {
     const key = this.getKey(type, value);
     const codeHash = createSha256Hash(code);
 
